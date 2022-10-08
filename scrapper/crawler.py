@@ -7,12 +7,38 @@ URLS_TO_AVOID = [
     "https://www.youtube.com",
     "https://www.mail.google.com",
     "https://www.twitter.com",
+    "https://youtube.com",
+    "https://facebook.com",
+    "https://twitter.com",
+    "https://instagram.com",
+    "https://www.linkedin.com",
+    "https://developers.google.com",
+    "https://www.facebook.com",
+    "https://developers.facebook.com",
+    "https://developer.linkedin.com",
+    "https://translate.google.com",
+    "https://www.google.com.sg",
+    "https://accounts.google.com",
+    "https://policies.google.com",
+    "https://support.google.com",
+    "https://cloud.google.com",
+    "https://maps.google.com.sg",
+    "https://play.google.com",
+    "https://news.google.com",
+    "https://mail.google.com",
+    "https://drive.google.com",
+    "https://myaccount.google.com",
+    "https://safety.google",
+    "https://account.google.com",
+    "https://about.google",
+    "https://firebase.google.com",
+    "https://payments.google.com",
 ]
 
 # starts from a url and tries to find another domain to scan
 def crawl(base_url):
     url_queue = [base_url]
-    urls_already_searched = [].extend(URLS_TO_AVOID)
+    urls_already_searched = URLS_TO_AVOID
     while url_queue != []:
         url = url_queue.pop(0)
         if url not in urls_already_searched:
