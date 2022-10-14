@@ -33,6 +33,7 @@ URLS_TO_AVOID = [
     "https://about.google",
     "https://firebase.google.com",
     "https://payments.google.com",
+    "https://developer.apple.com",
 ]
 
 # starts from a url and tries to find another domain to scan
@@ -53,17 +54,19 @@ def get_other_domains(url):
     url_home_page = extract_domain_home_page(url)
     urls = []
     try:
-        response = requests.request("GET", url)
+        response = requests.request("GET", url, timeout=30)  # max 30s
         soup = BeautifulSoup(response.text, "lxml")
         for a in soup.find_all("a"):
             possible_link = a.attrs["href"] if "href" in a.attrs else ""
-            # if link starts with https://
+            # if link starts with https:// or http://
             # check if link's home page is same as base url
             # if not, add to urls
-            if possible_link.startswith("https://"):
+            if possible_link.startswith("https://") or possible_link.startswith(
+                "http://"
+            ):
                 link_home_page = extract_domain_home_page(possible_link)
                 if link_home_page != url_home_page and link_home_page not in urls:
-                    urls.append("https://" + link_home_page)
+                    urls.append(link_home_page)
     except:
         print("error with " + url)
         return []
@@ -72,15 +75,23 @@ def get_other_domains(url):
 
 
 # takes in https://something.com/something
-# and returns something.com
+# and returns https://something.com
 def extract_domain_home_page(url):
+    # remove https:// or http://
+    linkPrefix = ""
     if "https://" in url:
         url = url[8:]
+        linkPrefix = "https://"
 
+    if "http://" in url:
+        url = url[7:]
+        linkPrefix = "http://"
+
+    # remove extra /
     if "/" in url:
-        return url.split("/")[0]
+        return linkPrefix + url.split("/")[0]
     else:
-        return url
+        return linkPrefix + url
 
 
 print(crawl("http://governmentof.com/singapore/"))
