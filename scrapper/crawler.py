@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+from pathlib import Path
 
 # a lsit of urls to skip
 URLS_TO_AVOID = [
@@ -51,22 +52,22 @@ def crawl(base_url):
 
 # scans through a url and finds all the other domains in the url
 def get_other_domains(url):
-    url_home_page = extract_domain_home_page(url)
     urls = []
     try:
         response = requests.request("GET", url, timeout=30)  # max 30s
         soup = BeautifulSoup(response.text, "lxml")
         for a in soup.find_all("a"):
             possible_link = a.attrs["href"] if "href" in a.attrs else ""
-            # if link starts with https:// or http://
-            # check if link's home page is same as base url
-            # if not, add to urls
-            if possible_link.startswith("https://") or possible_link.startswith(
-                "http://"
-            ):
-                link_home_page = extract_domain_home_page(possible_link)
-                if link_home_page != url_home_page and link_home_page not in urls:
-                    urls.append(link_home_page)
+            final_subdomain = get_final_subdomain(possible_link)
+            # if link starts with https:// or http:// and has no suffix (prevent downloading)
+            if (
+                possible_link.startswith("https://")
+                or possible_link.startswith("http://")
+            ) and not Path(final_subdomain).suffix:
+                # check if link's is same as base url
+                # if not, add to urls
+                if possible_link != url and possible_link not in urls:
+                    urls.append(possible_link)
     except:
         print("error with " + url)
         return []
@@ -74,24 +75,26 @@ def get_other_domains(url):
     return urls
 
 
-# takes in https://something.com/something
-# and returns https://something.com
-def extract_domain_home_page(url):
+# takes in https://www.google.com/a/b and returns b
+def get_final_subdomain(url):
     # remove https:// or http://
-    linkPrefix = ""
     if "https://" in url:
         url = url[8:]
-        linkPrefix = "https://"
 
     if "http://" in url:
         url = url[7:]
-        linkPrefix = "http://"
 
-    # remove extra /
+    # has subdomains
     if "/" in url:
-        return linkPrefix + url.split("/")[0]
+        # if last character is a / then remove it and check again
+        if url[-1] == "/":
+            url = url.rstrip(url[-1])
+            if "/" not in url:
+                return ""
+
+        return url.split("/")[-1]
     else:
-        return linkPrefix + url
+        return ""
 
 
 print(crawl("http://governmentof.com/singapore/"))
