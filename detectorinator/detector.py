@@ -9,16 +9,14 @@ def extract(link):
     return {
         "url": link,
         "is_ip_address": link_has_at(link),
+        "is_way_too_long": link_is_way_too_long(link),
         "has_at": link_has_at(link),
         "has_dash": link_has_dash(link),
     }
 
 
-# links that are ip addresses are kinda sus
-# returns 1 if is ip address and 0 if not
-def link_is_ip_address(link):
-    # extract the home-page link first, assumes link starts with https:// or http://
-
+# takes in https://www.google.com/ and returns www.google.com
+def extract_homepage_link(link):
     # remove https://
     if link.startswith("https://"):
         link = link[8:]
@@ -31,6 +29,16 @@ def link_is_ip_address(link):
     if "/" in link:
         link = link.split("/")[0]
 
+    return link
+
+
+# links that are ip addresses are kinda sus
+# returns 1 if is ip address and 0 if not
+def link_is_ip_address(link):
+    # extract the home-page link first, assumes link starts with https:// or http://
+
+    link = extract_homepage_link(link)
+
     # remove all dots, i.e www.google.com becomes wwwgooglecom
     link = link.replace(".", "")
 
@@ -40,6 +48,12 @@ def link_is_ip_address(link):
         return 1
     except:
         return 0
+
+
+# links that are really long are sus
+# returns 1 if link is really long and 0 if not
+def link_is_way_too_long(link):
+    return 1 if len(link) >= 54 else 0
 
 
 # using the @ symbol leads the browser to ignore everything preceding it
@@ -54,5 +68,5 @@ def link_has_dash(link):
     return 1 if "-" in link else 0
 
 
-link = "http://insert_link_here"
+link = "http://www.google.com"
 print(extract(link))
