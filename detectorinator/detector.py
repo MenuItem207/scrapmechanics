@@ -8,9 +8,38 @@ def extract(link):
 
     return {
         "url": link,
+        "is_ip_address": link_has_at(link),
         "has_at": link_has_at(link),
         "has_dash": link_has_dash(link),
     }
+
+
+# links that are ip addresses are kinda sus
+# returns 1 if is ip address and 0 if not
+def link_is_ip_address(link):
+    # extract the home-page link first, assumes link starts with https:// or http://
+
+    # remove https://
+    if link.startswith("https://"):
+        link = link[8:]
+
+    # remove http://
+    elif link.startswith("http://"):
+        link = link[7:]
+
+    # only keep the first part of link i.e www.google.com/a becomes www.google.com
+    if "/" in link:
+        link = link.split("/")[0]
+
+    # remove all dots, i.e www.google.com becomes wwwgooglecom
+    link = link.replace(".", "")
+
+    # check if can be converted to int, if so is ip address
+    try:
+        int(link)
+        return 1
+    except:
+        return 0
 
 
 # using the @ symbol leads the browser to ignore everything preceding it
@@ -25,5 +54,5 @@ def link_has_dash(link):
     return 1 if "-" in link else 0
 
 
-link = "https://insert_link_here"
+link = "http://www.google.com"
 print(extract(link))
