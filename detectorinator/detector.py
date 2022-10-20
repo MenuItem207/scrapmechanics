@@ -54,5 +54,5 @@ def link_has_dash(link):
     return 1 if "-" in link else 0
 
 
-link = "http://www.google.com"
+link = "http://insert_link_here"
 print(extract(link))
